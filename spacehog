@@ -98,20 +98,22 @@ try:
 		quiet = False
 
 	if args.ignore:
-		if os.path.isabs(args.ignore):
-			ignore = args.ignore
+		if args.ignore.lower() == 'none':
+			ignore = ""
 		else:
-			ignore = os.path.join(basedir,args.ignore);
-		try:
-			f = open(ignore)
-			f.close()
-		except Exception as e:
-			if hasattr(e, 'message'):
-				print('Cannot open ignore list in {}: {}'.format(ignore,e.message), file=sys.stderr)
+			if os.path.isabs(args.ignore):
+				ignore = args.ignore
 			else:
-				print('Cannot open ignore list {}'.format(e), file=sys.stderr)
-
-			sys.exit(1)
+				ignore = os.path.join(basedir,args.ignore);
+			try:
+				f = open(ignore)
+				f.close()
+			except Exception as e:
+				if hasattr(e, 'message'):
+					print('Cannot open ignore list in {}: {}'.format(ignore,e.message), file=sys.stderr)
+				else:
+					print('Cannot open ignore list {}'.format(e), file=sys.stderr)
+				sys.exit(1)
 	else:
 		ignore = os.path.join(basedir,'.spacehog.ignore');
 
@@ -149,5 +151,5 @@ try:
 
 	print('\n\t{} in {} directories ({} files)'.format(format_bytes(total),dc, fcount))
 except KeyboardInterrupt:
-	print('\nInterrupted',file=sys.stderr)
+	print('\n\nInterrupted',file=sys.stderr)
 	sys.exit(1)
