@@ -1,0 +1,153 @@
+#!/usr/bin/env python3
+import argparse, re, os, sys
+"""
+Program to find the top disk hogs in a directory tree. 
+Usage: prog args [path]
+args:
+		--count number of directories to display (may be less if there arent that many)
+		--ignore file with list of regular expressions (or plain text) of paths to ignore
+		--quiet prevents scanning status messages. Usefull for reports.
+		--mounted scan mounted filesystems. Default is no.
+
+"""
+def format_bytes(size):
+	"""
+	Format number in human readable format.
+	"""
+	# 2**10 = 1024
+	power = 2**10
+	n = 0
+	power_labels = {0 : '', 1: 'k', 2: 'M', 3: 'G', 4: 'T'}
+	while size > power:
+		size /= power
+		n += 1
+	return '{:.1f}{}'.format(size,power_labels[n]+'b')
+
+def getdirsz(path):
+	"""
+	Return the apparent size of a directory testing all files for size. 
+	"""
+	tot = 0
+	fc = 0
+	for (path, dirs, files) in os.walk(path):
+		for file in files:
+			try:
+				filename = os.path.join(path, file)
+				tot += os.path.getsize(filename)
+				fc = fc + 1
+			except:
+				pass
+	return tot, fc
+
+def scanner(sdir,quiet,ignorelist, mounted):
+	"""
+	Return a list of tuples with size and path. 
+	if quiet is true no status messages are displayed.
+	if ignorelist is specified, treat as regex of paths to ignore
+	"""
+	dirsz = []
+	fcount = 0
+	try:
+		for f in os.listdir(sdir):
+			d = os.path.join(sdir,f)
+			if os.path.isdir(d):
+				if ignorelist:
+					if re.match(ignorelist,os.path.basename(d)):
+						continue
+				if not mounted:
+					if os.path.ismount(d):
+						continue
+				if not quiet:
+					sys.stdout.write("\rScanning {}\033[K\r".format(d))
+				sz, fc = getdirsz(d)
+				dirsz.append((sz, f, fc))
+				fcount = fcount + fc
+	except Exception as e:
+		if hasattr(e, 'message'):
+			print('Cannot scan {}: {}'.format(ignore,e.message), file=sys.stderr)
+		else:
+			print('Cannot scan {}'.format(e), file=sys.stderr)
+		sys.exit(1)
+
+	if not quiet:
+		sys.stdout.write('\r\033[K');
+	return dirsz;
+
+try:
+	parser = argparse.ArgumentParser();
+	parser.description = "Spacehog - show top disk space hogs"
+	parser.add_argument('--count',type=int,help="Show top n directories, default is 10", metavar='number')
+	parser.add_argument('--ignore',type=str,help='file name containing list of directories to ignore. Default is .spacehog.ignore if it exists',metavar='filename')
+	parser.add_argument('--mounted',help='Traverse mounted filesystems',action='store_true')
+	parser.add_argument('--quiet',help="Quiet mode, don't show scanning status",action='store_true')
+	parser.add_argument('path', nargs='?', type=str,help="Path to scan",default=os.getcwd())
+	args = parser.parse_args();
+
+	if args.path:
+		basedir = os.path.abspath(args.path)
+	else:
+		basedir = os.getcwd()
+	if args.count:
+		count = args.count
+	else:
+		count = 10
+
+	if args.quiet:
+		quiet = True
+	else:
+		quiet = False
+
+	if args.ignore:
+		if os.path.isabs(args.ignore):
+			ignore = args.ignore
+		else:
+			ignore = os.path.join(basedir,args.ignore);
+		try:
+			f = open(ignore)
+			f.close()
+		except Exception as e:
+			if hasattr(e, 'message'):
+				print('Cannot open ignore list in {}: {}'.format(ignore,e.message), file=sys.stderr)
+			else:
+				print('Cannot open ignore list {}'.format(e), file=sys.stderr)
+
+			sys.exit(1)
+	else:
+		ignore = os.path.join(basedir,'.spacehog.ignore');
+
+	if args.mounted:
+		mounted = True
+	else:
+		mounted = False
+
+	if os.path.exists(ignore):
+		with open(ignore) as f:
+			ignorelist = f.readlines()
+		ignorelist = [x.strip() for x in ignorelist]
+		ignorelist = '(?:% s)' % '|'.join(ignorelist)
+	else:
+		ignorelist = False
+	dirsz = scanner(basedir,quiet,ignorelist, mounted)
+	if len(dirsz) < 1:
+		print('No directories found in {}'.format(basedir), file=sys.stdout)
+		sys.exit(1)
+
+	dirsz = sorted(dirsz,key=lambda item: item[0],reverse=True)[:count]
+	width = max(len(format_bytes(item[0])) for item in dirsz)
+	dwidth = max(len(item[1]) for item in dirsz)
+	total = 0
+	dc = len(dirsz)
+	fcount = 0
+	print('Top {} Space Hogging directories in {}'.format(dc,basedir))
+	print('{} Path'.format('Size'.rjust(width)))
+	print('{} {}'.format(''.rjust(width,'='),''.rjust(dwidth+1,'=')))
+	for sz,path,fc in dirsz:
+		fcount = fcount + fc
+		total = total + sz
+		sz = format_bytes(sz)
+		print('{} {}'.format(sz.rjust(width),path))
+
+	print('\n\t{} in {} directories ({} files)'.format(format_bytes(total),dc, fcount))
+except KeyboardInterrupt:
+	print('Interrupted',file=sys.stderr)
+	sys.exit(1)
