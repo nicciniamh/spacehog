@@ -79,6 +79,7 @@ try:
 	parser.add_argument('--count',type=int,help="Show top n directories, default is 10", metavar='number')
 	parser.add_argument('--ignore',type=str,help='file name containing list of directories to ignore. Default is .spacehog.ignore if it exists',metavar='filename')
 	parser.add_argument('--mounted',help='Traverse mounted filesystems',action='store_true')
+	parser.add_argument('--output',help='Output file name, implies --quiet',metavar="filename")
 	parser.add_argument('--quiet',help="Quiet mode, don't show scanning status",action='store_true')
 	parser.add_argument('path', nargs='?', type=str,help="Path to scan",default=os.getcwd())
 	args = parser.parse_args();
@@ -122,6 +123,16 @@ try:
 	else:
 		mounted = False
 
+	if args.output:
+		try:
+			output = open(args.output,'x')
+			quiet = True
+		except Exception as e:
+			print('Cannot open output file {}'.format(e),file=sys.stdout)
+			sys.exit(1)
+	else:
+		output = sys.stdout
+
 	if os.path.exists(ignore):
 		with open(ignore) as f:
 			ignorelist = f.readlines()
@@ -140,16 +151,16 @@ try:
 	total = 0
 	dc = len(dirsz)
 	fcount = 0
-	print('Top {} Space Hogging directories in {}'.format(dc,basedir))
-	print('{} Path'.format('Size'.rjust(width)))
-	print('{} {}'.format(''.rjust(width,'='),''.rjust(dwidth+1,'=')))
+	print('Top {} Space Hogging directories in {}'.format(dc,basedir), file=output)
+	print('{} Path'.format('Size'.rjust(width)), file=output)
+	print('{} {}'.format(''.rjust(width,'='),''.rjust(dwidth+1,'=')), file=output)
 	for sz,path,fc in dirsz:
 		fcount = fcount + fc
 		total = total + sz
 		sz = format_bytes(sz)
-		print('{} {}'.format(sz.rjust(width),path))
+		print('{} {}'.format(sz.rjust(width),path), file=output)
 
-	print('\n\t{} in {} directories ({} files)'.format(format_bytes(total),dc, fcount))
+	print('\n\t{} in {} directories ({} files)'.format(format_bytes(total),dc, fcount), file=output)
 except KeyboardInterrupt:
 	print('\n\nInterrupted',file=sys.stderr)
 	sys.exit(1)

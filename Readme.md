@@ -14,6 +14,8 @@ Program arguments
  		
 *--mounted* scan mounted filesystems. Default is to not traverse mounted file systems.
 
+*--output* filename. Write report to *filename*, implies --quiet as well.
+
 *--quiet* prevents scanning status messages. 
 
 *[dir]* Optional directory to scan or current working directory if not specified.
