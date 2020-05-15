@@ -149,5 +149,5 @@ try:
 
 	print('\n\t{} in {} directories ({} files)'.format(format_bytes(total),dc, fcount))
 except KeyboardInterrupt:
-	print('Interrupted',file=sys.stderr)
+	print('\nInterrupted',file=sys.stderr)
 	sys.exit(1)
