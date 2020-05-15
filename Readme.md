@@ -1,17 +1,16 @@
+
 # Spacehog
 Python Script to find disk space 'hogs'
 
 
 ## Usage
 
- *spacehog* [-h] [--count number] [--dirlist list] [--ignore filename][--mounted] [--output filename] [--quiet] [dir] 
+ *spacehog* [-h] [--count number] [--ignore filename][--mounted] [--output filename] [--quiet] [dir] ... 
  
 Program arguments
 
 *--count*  number of directories to display (may be less if there arent that many)
 
-*--dirlist* list of directories to scan, separated by commas.
- 		
 *--ignore* file with list of regular expressions (or plain text) of paths to ignore
  		
 *--mounted* scan mounted filesystems. Default is to not traverse mounted file systems.
@@ -22,8 +21,10 @@ Program arguments
 
 *[dir]* Optional directory to scan or current working directory if not specified.
 
+*dir ..* one or more directories to scan. If not specified, current workng directory is used.
+
 # Description
-*Spacehog* attempts to located files and directories under *dir* and calculate, based on file size, the usage and reports the top *count* directories.
+*Spacehog* attempts to located files and directories under *dir* and calculate, based on file size, the usage and reports the top *count* directories. Multiple directories may be specified. 
 
 This program is generally pretty quick depending on disk type and processor speed. 
 
@@ -37,18 +38,19 @@ By default, *spacehog* will not traverse mounted filesystems. This is done using
 By default, *spacehog* displays it's progress/status when scanning directories. To prevent this, use gthe --quiet option. This is useful if you want a report generrated. 
 
 ### Sample Output
-<pre>
-Top 10 Space Hogging directories in /
-   Size Path
-======= ========
- 10.1Gb webroot
-  1.2Gb usr
-351.4Mb var
-181.8Mb lib
-128.8Mb sbin
- 75.3Mb boot
- 31.2Mb etc
- 21.0Mb bin
-851.6kb home
-167.0kb lib64
-</pre>
+
+     Top 10 Space Hogging directories in /
+         Size Path
+      ======= ========
+       10.1Gb webroot
+        1.2Gb usr
+      351.4Mb var
+      181.8Mb lib
+      128.8Mb sbin
+       75.3Mb boot
+       31.2Mb etc
+       21.0Mb bin
+      851.6kb home
+      167.0kb lib64
+
+ 

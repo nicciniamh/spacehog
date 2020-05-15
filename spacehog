@@ -39,21 +39,37 @@ def getdirsz(path):
 				pass
 	return tot, fc
 
-def scanner(sdir,quiet,ignorelist, mounted, dirlist):
+def scanner(sdir,quiet,ignore, mounted):
 	"""
 	Return a list of tuples with size and path. 
 	if quiet is true no status messages are displayed.
 	if ignorelist is specified, treat as regex of paths to ignore
 	"""
+	if ignore:
+		if not os.path.isabs(ignore):
+			ignorefile = os.path.join(sdir,ignore)
+		else:
+			ignorefile = ignore
+		try:
+			if os.path.exists(ignorefile):
+				with open(ignorefile) as f:
+					ignorelist = f.readlines()
+				ignorelist = [x.strip() for x in ignorelist]
+				ignorelist = '(?:% s)' % '|'.join(ignorelist)
+			else:
+				ignorelist = False
+		except Exception as e:
+			if os.path.basename(ignore) == ".spacehog.ignore":
+				pass
+			else:
+				print('Warning: Cannot open ignore list {}'.format(e), file=sys.stderr)
+
 	dirsz = []
 	fcount = 0
 	try:
 		for f in os.listdir(sdir):
 			d = os.path.join(sdir,f)
 			if os.path.isdir(d):
-				if dirlist:
-					if not re.match(dirlist,os.path.basename(d)):
-						continue
 				if ignorelist:
 					if re.match(ignorelist,os.path.basename(d)):
 						continue
@@ -80,27 +96,27 @@ try:
 	parser = argparse.ArgumentParser();
 	parser.description = "Spacehog - show top disk space hogs"
 	parser.add_argument('--count',type=int,help="Show top n directories, default is 10", metavar='number')
-	parser.add_argument('--dirlist',type=str,help="Scan only directories in comma delimited list", metavar='list')
 	parser.add_argument('--ignore',type=str,help='file name containing list of directories to ignore. Default is .spacehog.ignore if it exists',metavar='filename')
 	parser.add_argument('--mounted',help='Traverse mounted filesystems',action='store_true')
 	parser.add_argument('--output',type=str,help='Output file name, implies --quiet',metavar="filename")
 	parser.add_argument('--quiet',help="Quiet mode, don't show scanning status",action='store_true')
-	parser.add_argument('path', nargs='?', type=str,help="Path to scan",default=os.getcwd())
+	parser.add_argument('path', nargs='*', type=str,help="Path to scan",metavar="dir ...")
 	args = parser.parse_args();
 
-	if args.path:
-		basedir = os.path.abspath(args.path)
+	dirlist = []
+
+	if args.path and len(args.path):
+		if type(args.path) is str:
+			args.path = [args.path]
+		for d in args.path:
+			dirlist.append(os.path.abspath(os.path.expanduser(d)))
 	else:
-		basedir = os.getcwd()
+		dirlist = [os.getcwd()]
+
 	if args.count:
 		count = args.count
 	else:
 		count = 10
-
-	if args.dirlist:
-		dirlist='(?:% s)' % '|'.join(args.dirlist.split(','))
-	else:
-		dirlist=None
 
 	if args.quiet:
 		quiet = True
@@ -111,21 +127,9 @@ try:
 		if args.ignore.lower() == 'none':
 			ignore = ""
 		else:
-			if os.path.isabs(args.ignore):
-				ignore = args.ignore
-			else:
-				ignore = os.path.join(basedir,args.ignore);
-			try:
-				f = open(ignore)
-				f.close()
-			except Exception as e:
-				if hasattr(e, 'message'):
-					print('Cannot open ignore list in {}: {}'.format(ignore,e.message), file=sys.stderr)
-				else:
-					print('Cannot open ignore list {}'.format(e), file=sys.stderr)
-				sys.exit(1)
+			ignore = args.ignore
 	else:
-		ignore = os.path.join(basedir,'.spacehog.ignore');
+		ignore = ".spacehog.ignore"
 
 	if args.mounted:
 		mounted = True
@@ -142,14 +146,11 @@ try:
 	else:
 		output = sys.stdout
 
-	if os.path.exists(ignore):
-		with open(ignore) as f:
-			ignorelist = f.readlines()
-		ignorelist = [x.strip() for x in ignorelist]
-		ignorelist = '(?:% s)' % '|'.join(ignorelist)
-	else:
-		ignorelist = False
-	dirsz = scanner(basedir,quiet,ignorelist, mounted,dirlist)
+	dirsz = []
+
+	for d in dirlist:
+		dirsz = dirsz + scanner(d,quiet,ignore, mounted)
+
 	if len(dirsz) < 1:
 		print('No directories found in {}'.format(basedir), file=sys.stdout)
 		sys.exit(1)
@@ -160,7 +161,8 @@ try:
 	total = 0
 	dc = len(dirsz)
 	fcount = 0
-	print('Top {} Space Hogging directories in {}'.format(dc,basedir), file=output)
+	dirlist = ','.join(dirlist)
+	print('Top {} Space Hogging directories in {}'.format(dc,dirlist), file=output)
 	print('{} Path'.format('Size'.rjust(width)), file=output)
 	print('{} {}'.format(''.rjust(width,'='),''.rjust(dwidth+1,'=')), file=output)
 	for sz,path,fc in dirsz:
