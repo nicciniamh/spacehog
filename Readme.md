@@ -1,4 +1,4 @@
-![Spacehog](logo.png)
+![Spacehog](logo.png =480x336)
 # Spacehog
 Python Script to find disk space 'hogs'
 
