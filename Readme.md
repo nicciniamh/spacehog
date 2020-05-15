@@ -4,7 +4,7 @@ Python Script to find disk space 'hogs'
 
 ## Usage
 
- *spacehog* [-h] [--count number] [--ignore filename][--mounted] [--quiet] [dir] 
+ *spacehog* [-h] [--count number] [--ignore filename][--mounted] [--output filename] [--quiet] [dir] 
  
 Program arguments
 
