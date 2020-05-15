@@ -4,11 +4,13 @@ Python Script to find disk space 'hogs'
 
 ## Usage
 
- *spacehog* [-h] [--count number] [--ignore filename][--mounted] [--output filename] [--quiet] [dir] 
+ *spacehog* [-h] [--count number] [--dirlist list] [--ignore filename][--mounted] [--output filename] [--quiet] [dir] 
  
 Program arguments
 
 *--count*  number of directories to display (may be less if there arent that many)
+
+*--dirlist* list of directories to scan, separated by commas.
  		
 *--ignore* file with list of regular expressions (or plain text) of paths to ignore
  		

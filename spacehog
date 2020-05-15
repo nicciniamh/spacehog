@@ -39,7 +39,7 @@ def getdirsz(path):
 				pass
 	return tot, fc
 
-def scanner(sdir,quiet,ignorelist, mounted):
+def scanner(sdir,quiet,ignorelist, mounted, dirlist):
 	"""
 	Return a list of tuples with size and path. 
 	if quiet is true no status messages are displayed.
@@ -51,6 +51,9 @@ def scanner(sdir,quiet,ignorelist, mounted):
 		for f in os.listdir(sdir):
 			d = os.path.join(sdir,f)
 			if os.path.isdir(d):
+				if dirlist:
+					if not re.match(dirlist,os.path.basename(d)):
+						continue
 				if ignorelist:
 					if re.match(ignorelist,os.path.basename(d)):
 						continue
@@ -77,9 +80,10 @@ try:
 	parser = argparse.ArgumentParser();
 	parser.description = "Spacehog - show top disk space hogs"
 	parser.add_argument('--count',type=int,help="Show top n directories, default is 10", metavar='number')
+	parser.add_argument('--dirlist',type=str,help="Scan only directories in comma delimited list", metavar='list')
 	parser.add_argument('--ignore',type=str,help='file name containing list of directories to ignore. Default is .spacehog.ignore if it exists',metavar='filename')
 	parser.add_argument('--mounted',help='Traverse mounted filesystems',action='store_true')
-	parser.add_argument('--output',help='Output file name, implies --quiet',metavar="filename")
+	parser.add_argument('--output',type=str,help='Output file name, implies --quiet',metavar="filename")
 	parser.add_argument('--quiet',help="Quiet mode, don't show scanning status",action='store_true')
 	parser.add_argument('path', nargs='?', type=str,help="Path to scan",default=os.getcwd())
 	args = parser.parse_args();
@@ -92,6 +96,11 @@ try:
 		count = args.count
 	else:
 		count = 10
+
+	if args.dirlist:
+		dirlist='(?:% s)' % '|'.join(args.dirlist.split(','))
+	else:
+		dirlist=None
 
 	if args.quiet:
 		quiet = True
@@ -140,7 +149,7 @@ try:
 		ignorelist = '(?:% s)' % '|'.join(ignorelist)
 	else:
 		ignorelist = False
-	dirsz = scanner(basedir,quiet,ignorelist, mounted)
+	dirsz = scanner(basedir,quiet,ignorelist, mounted,dirlist)
 	if len(dirsz) < 1:
 		print('No directories found in {}'.format(basedir), file=sys.stdout)
 		sys.exit(1)
