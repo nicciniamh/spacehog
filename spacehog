@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import argparse, re, os, sys
+import argparse, re, os, sys, datetime, psutil
 """
 Program to find the top disk hogs in a directory tree. 
 Usage: prog args [path]
@@ -10,6 +10,25 @@ args:
 		--mounted scan mounted filesystems. Default is no.
 
 """
+import os
+def find_sdiskpart(path):
+    path = os.path.abspath(path)
+    while not os.path.ismount(path):
+        path = os.path.dirname(path)
+    p = [p for p in psutil.disk_partitions(all=True) if p.mountpoint == path.__str__()]
+    l = len(p)
+    if len(p) == 1:
+        return p[0]
+    raise psutil.Error
+
+def getmount(path):        
+    path = os.path.realpath(os.path.abspath(path))
+    while path != os.path.sep:
+        if os.path.ismount(path):
+            return path
+        path = os.path.abspath(os.path.join(path, os.pardir))
+    return path
+
 def format_bytes(size):
 	"""
 	Format number in human readable format.
@@ -100,6 +119,7 @@ try:
 	parser.add_argument('--mounted',help='Traverse mounted filesystems',action='store_true')
 	parser.add_argument('--output',type=str,help='Output file name, implies --quiet',metavar="filename")
 	parser.add_argument('--quiet',help="Quiet mode, don't show scanning status",action='store_true')
+	parser.add_argument('--showfs',help="Show info about filesystem(s) involved",action='store_true',default=False)
 	parser.add_argument('path', nargs='*', type=str,help="Path to scan",metavar="dir ...")
 	args = parser.parse_args();
 
@@ -161,8 +181,12 @@ try:
 	total = 0
 	dc = len(dirsz)
 	fcount = 0
-	dirlist = ','.join(dirlist)
-	print('Top {} Space Hogging directories in {}'.format(dc,dirlist), file=output)
+	dlist = ','.join(dirlist)
+	print('Top {} Space Hogging directories in {}'.format(dc,dlist), file=output)
+	if output != sys.stdout:
+		d = datetime.datetime.now()
+		d = d.strftime("%H:%M, %d %B, %Y")
+		print("Report run {}\n".format(d),file=output)
 	print('{} Path'.format('Size'.rjust(width)), file=output)
 	print('{} {}'.format(''.rjust(width,'='),''.rjust(dwidth+1,'=')), file=output)
 	for sz,path,fc in dirsz:
@@ -172,6 +196,30 @@ try:
 		print('{} {}'.format(sz.rjust(width),path), file=output)
 
 	print('\n\t{} in {} directories ({} files)'.format(format_bytes(total),dc, fcount), file=output)
+	if(args.showfs):	
+		fs = {}
+		for d in dirlist:
+			m = getmount(d)
+			if not m in fs:
+				fs[m] = [d]
+			else:
+				fs[m].append(d)
+		fsi = {}
+		for f in fs:
+			st = os.statvfs(f)
+			size = (st.f_frsize*st.f_blocks)
+			free = (st.f_frsize*st.f_bfree)
+			fsi[f] = [size,free]
+		for f in fs:
+			tot,free = fsi[f]
+			tot = format_bytes(tot)
+			free = format_bytes(free)
+			dirs = '\n\t\t\t'.join(fs[f])
+			p = fsi[f]
+			p = find_sdiskpart(f)
+			p = p.device
+			print('\t{}:\t{} bytes total, {} bytes free.\n\t\tdir(s): {}'.format(p,tot,free,dirs),file=output)
+
 except KeyboardInterrupt:
 	print('\n\nInterrupted',file=sys.stderr)
 	sys.exit(1)
