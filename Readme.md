@@ -1,3 +1,4 @@
+
 <img src="logo.png" style="height: 333; width: 640">
 # Spacehog
 Python Script to find disk space 'hogs'
@@ -5,12 +6,15 @@ Python Script to find disk space 'hogs'
 ## Requirements
 * Python3
 * *psutils (pip3 install psutils)
+
+
 ## Installation
 To install follow these steps:
 
-    git clone https://github.com/nicciniamh/spacehog.git
-    cp spacehog/spacehog ~/bin # or other directory on PAGH
-    chmod 755 ~bin/spacehog
+      git clone https://github.com/nicciniamh/spacehog.git
+      cp spacehog/spacehog ~/bin # or other directory on PAGH
+      chmod 755 ~bin/spacehog
+      cp default.ini ~/bin # This file must be present. 
 
 ## Usage
 
@@ -50,6 +54,10 @@ By default, *spacehog* will not traverse mounted filesystems. This is done using
 ## Quiet Mode
 By default, *spacehog* displays it's progress/status when scanning directories. To prevent this, use gthe --quiet option. This is useful if you want a report generrated. 
 
+## Customizing
+The file, default.ini, contains message texts and tokens to be replaced at runtime. These texts can be changed to customize the texts or even change to another language.
+
+
 ## Examples
 `spacehog --count=5 ~/Code` counts the top five directories in *~/Code*
 
@@ -61,24 +69,32 @@ By default, *spacehog* displays it's progress/status when scanning directories. 
 
 ### Sample Output
 
-      Top 10 Space Hogging directories in /Users/nicci
-         Size Path
-      ======= ====================================
-       96.5Gb Pictures
-       11.9Gb Music
-        6.5Gb Library
-      614.6Mb src
-      504.4Mb Applications
-      489.7Mb DAW data
-      272.4Mb node_modules
-      199.4Mb line6
-      182.6Mb iCloud Drive (Archive) - 2
-       61.5Mb Creative Cloud Files (archived) (2)
-      
-      	117.1Gb in 10 directories (85218 files)
-      	/dev/disk0s2:	465.0Gb bytes total, 311.6Gb bytes free (67% free)
-      		dir(s): /Users/nicci
- 
+      Report Run: 13:14, 20 May, 2020
+      Top 10 Space Hogging directories in /
+      --- -- ----- ------- ----------- -- -
+
+      Size Path
+      ---- ----
+
+      118.6Gb Users
+       15.5Gb Applications
+       10.1Gb System
+        9.1Gb private
+        9.0Gb var
+        4.9Gb Library
+        2.1Gb usr
+       18.5Mb tmp
+        6.1Mb sbin
+        5.2Mb .DocumentRevisions-V100
+
+	169.3Gb bytes in 10 directories (16 files)
+
+      File System Information
+      ---- ------ -----------
+
+      	/dev/disk0s2:	465.0Gb bytes total, 310.9Gb bytes free (66% free)
+		dir(s): /
+
 Copyright &copy; 2020 Nicole Stevens. Code may be freely used. Please keep my copyright intact. 
 
 For license see LICENSE. 
