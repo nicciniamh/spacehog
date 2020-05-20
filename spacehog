@@ -200,6 +200,12 @@ try:
 	else:
 		output = sys.stdout
 
+	if not os.path.isabs(args.config):
+		args.config = os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(sys.argv[0]))),args.config)
+	#print("Using config {}".format(args.config),file=sys.stderr)
+	if not os.path.exists(args.config):
+		print('Cannot find config file, {}'.format(args.config), file=sys.stderr)
+		sys.exit(1)
 	cfg = configparser.RawConfigParser()
 	cfg.read(args.config);
 	cfg = cfg['output']
@@ -233,6 +239,7 @@ try:
 		sz = format_bytes(sz)
 		print('      {} {}'.format(sz.rjust(width),path), file=output)
 
+	total = format_bytes(total)
 	print('      \n\t{}\n'.format(parseline(cfg['footer'],total=total,dircount=dc,filecount=fc)),file=output)
 
 	if(args.showfs):
