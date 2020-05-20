@@ -12,9 +12,10 @@ Python Script to find disk space 'hogs'
 To install follow these steps:
 
       git clone https://github.com/nicciniamh/spacehog.git
-      cp spacehog/spacehog ~/bin # or other directory on PAGH
+      cp spacehog/spacehog ~/bin # or other directory on PAT]H
       chmod 755 ~bin/spacehog
-      cp default.ini ~/bin # This file must be present. 
+      cp default.ini ~/bin # This file must be present.
+      pip3 install psutild
 
 ## Usage
 
