@@ -15,6 +15,12 @@ For license see LICENSE.
 
 """
 
+def header(s):
+	hl = ''
+	for l in s.split(' '):
+		hl = hl + ' '.rjust(len(l)+1,'=')
+	return '{}\n{}'.format(s,hl)
+
 def percentage(part, whole):
   return 100 * float(part)/float(whole)
 
@@ -193,7 +199,8 @@ try:
 	if output != sys.stdout:
 		d = datetime.datetime.now()
 		d = d.strftime("%H:%M, %d %B, %Y")
-		print("Report run {}\n".format(d),file=output)
+		print("Report run {}".format(d),file=output)
+	print(' ')
 	print('{} Path'.format('Size'.rjust(width)), file=output)
 	print('{} {}'.format(''.rjust(width,'='),''.rjust(dwidth+1,'=')), file=output)
 	for sz,path,fc in dirsz:
@@ -202,8 +209,9 @@ try:
 		sz = format_bytes(sz)
 		print('{} {}'.format(sz.rjust(width),path), file=output)
 
-	print('\n\t{} in {} directories ({} files)'.format(format_bytes(total),dc, fcount), file=output)
-	if(args.showfs):	
+	print('\n\t{} in {} directories ({} files)\n'.format(format_bytes(total),dc, fcount), file=output)
+	if(args.showfs):
+		print(header("File System Information"));
 		fs = {}
 		for d in dirlist:
 			m = getmount(d)
