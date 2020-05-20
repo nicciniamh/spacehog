@@ -9,8 +9,15 @@ args:
 		--quiet prevents scanning status messages. Usefull for reports.
 		--mounted scan mounted filesystems. Default is no.
 
+Copyright (C) 2020 Nicole Stevens. Code may be freely used. Please keep my copyright intact. 
+
+For license see LICENSE. 
+
 """
-import os
+
+def percentage(part, whole):
+  return 100 * float(part)/float(whole)
+
 def find_sdiskpart(path):
     path = os.path.abspath(path)
     while not os.path.ismount(path):
@@ -212,13 +219,14 @@ try:
 			fsi[f] = [size,free]
 		for f in fs:
 			tot,free = fsi[f]
+			perc = int(percentage(free,tot))
 			tot = format_bytes(tot)
 			free = format_bytes(free)
 			dirs = '\n\t\t\t'.join(fs[f])
 			p = fsi[f]
 			p = find_sdiskpart(f)
 			p = p.device
-			print('\t{}:\t{} bytes total, {} bytes free.\n\t\tdir(s): {}'.format(p,tot,free,dirs),file=output)
+			print('\t{}:\t{} bytes total, {} bytes free ({}% free)\n\t\tdir(s): {}'.format(p,tot,free,perc,dirs),file=output)
 
 except KeyboardInterrupt:
 	print('\n\nInterrupted',file=sys.stderr)

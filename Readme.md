@@ -61,18 +61,24 @@ By default, *spacehog* displays it's progress/status when scanning directories. 
 
 ### Sample Output
 
-     Top 10 Space Hogging directories in /
+      Top 10 Space Hogging directories in /Users/nicci
          Size Path
-      ======= ========
-       10.1Gb webroot
-        1.2Gb usr
-      351.4Mb var
-      181.8Mb lib
-      128.8Mb sbin
-       75.3Mb boot
-       31.2Mb etc
-       21.0Mb bin
-      851.6kb home
-      167.0kb lib64
-
+      ======= ====================================
+       96.5Gb Pictures
+       11.9Gb Music
+        6.5Gb Library
+      614.6Mb src
+      504.4Mb Applications
+      489.7Mb DAW data
+      272.4Mb node_modules
+      199.4Mb line6
+      182.6Mb iCloud Drive (Archive) - 2
+       61.5Mb Creative Cloud Files (archived) (2)
+      
+      	117.1Gb in 10 directories (85218 files)
+      	/dev/disk0s2:	465.0Gb bytes total, 311.6Gb bytes free (67% free)
+      		dir(s): /Users/nicci
  
+Copyright &copy; 2020 Nicole Stevens. Code may be freely used. Please keep my copyright intact. 
+
+For license see LICENSE. 
