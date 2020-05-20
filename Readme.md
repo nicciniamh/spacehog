@@ -15,7 +15,7 @@ To install follow these steps:
       cp spacehog/spacehog ~/bin # or other directory on PATH
       chmod 755 ~bin/spacehog
       cp default.ini ~/bin # This file must be present.
-      pip3 install psutild
+      pip3 install psutils
 
 ## Usage
 
