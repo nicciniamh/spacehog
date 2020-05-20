@@ -18,10 +18,11 @@ To install follow these steps:
 
 ## Usage
 
- *spacehog* [-h] [--count number] [--ignore filename][--mounted] [--showfs] [--output filename] [--quiet] [dir] ... 
+ *spacehog* [-h] [--config] [--count number] [--ignore filename][--mounted] [--showfs] [--output filename] [--quiet] [dir] ... 
  
 ### Program arguments
 
+*--config* Full path to a different ini file.
 *--count*  number of directories to display (may be less if there arent that many)
 
 *--ignore* file with list of regular expressions (or plain text) of paths to ignore
