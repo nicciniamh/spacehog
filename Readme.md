@@ -2,6 +2,9 @@
 # Spacehog
 Python Script to find disk space 'hogs'
 
+## Requirements
+* Python3
+* *psutils (pip3 install psutils)
 ## Installation
 To install follow these steps:
 
@@ -11,9 +14,9 @@ To install follow these steps:
 
 ## Usage
 
- *spacehog* [-h] [--count number] [--ignore filename][--mounted] [--output filename] [--quiet] [dir] ... 
+ *spacehog* [-h] [--count number] [--ignore filename][--mounted] [--showfs] [--output filename] [--quiet] [dir] ... 
  
-Program arguments
+### Program arguments
 
 *--count*  number of directories to display (may be less if there arent that many)
 
@@ -23,12 +26,18 @@ Program arguments
 
 *--output* filename. Write report to *filename*, implies --quiet as well.
 
-*--quiet* prevents scanning status messages. 
+*--quiet* prevents scanning status messages.
+
+*--showfs* Show filesystem information. 
 
 *dir ..* one or more directories to scan. If not specified, current workng directory is used.
 
 # Description
-*Spacehog* attempts to located files and directories under *dir* and calculate, based on file size, the usage and reports the top *count* directories. Multiple directories may be specified. 
+*Spacehog* attempts to located files and directories under *dir* and calculate, based on file size, the usage and reports the top *count* directories. Multiple directories may be specified.
+
+To create a report, use the --output file.ext option to write a report to file.ext. Reports are written with a timestamp in the banner.
+
+To include filesystem information (free space, total space and percent free) use the --showfs option.  
 
 This program is generally pretty quick depending on disk type and processor speed. 
 
