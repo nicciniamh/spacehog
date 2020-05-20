@@ -23,6 +23,7 @@ To install follow these steps:
 ### Program arguments
 
 *--config* Full path to a different ini file.
+
 *--count*  number of directories to display (may be less if there arent that many)
 
 *--ignore* file with list of regular expressions (or plain text) of paths to ignore
