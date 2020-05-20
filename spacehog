@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import argparse, re, os, sys, datetime, psutil
+import argparse, re, os, sys, datetime, psutil, textwrap, configparser
 """
 Program to find the top disk hogs in a directory tree. 
 Usage: prog args [path]
@@ -15,11 +15,31 @@ For license see LICENSE.
 
 """
 
-def header(s):
+def parseline(s,**kwargs):
+	l = ''
+	for key,val in kwargs.items():
+		key = '%'+key
+		s = s.replace(key,str(val))
+
+	return s
+
+def header(s, output, underline=False, underchar='=',**kwargs):
 	hl = ''
-	for l in s.split(' '):
-		hl = hl + ' '.rjust(len(l)+1,'=')
-	return '{}\n{}'.format(s,hl)
+	s = parseline(s,**kwargs)
+	if 'justify' in kwargs:
+		justify = kwargs['justify']
+		if 'justfields' in kwargs and 'justwidths' in kwargs:
+			justfields = kwargs['justfields']
+			justwidths = kwargs['justwidths']
+		else:
+			justify = False
+	else:
+		justify = False
+
+	if(underline):
+		for l in s.split(' '):
+			hl = hl + ' '.rjust(len(l)+1,underchar)
+	print('      {}\n      {}\n'.format(s,hl), file=output)
 
 def percentage(part, whole):
   return 100 * float(part)/float(whole)
@@ -127,6 +147,7 @@ def scanner(sdir,quiet,ignore, mounted):
 try:
 	parser = argparse.ArgumentParser();
 	parser.description = "Spacehog - show top disk space hogs"
+	parser.add_argument('--config',type=str,help="Conmfiguation file. Default is default.ini in cwd", metavar='filename',default='default.ini')
 	parser.add_argument('--count',type=int,help="Show top n directories, default is 10", metavar='number')
 	parser.add_argument('--ignore',type=str,help='file name containing list of directories to ignore. Default is .spacehog.ignore if it exists',metavar='filename')
 	parser.add_argument('--mounted',help='Traverse mounted filesystems',action='store_true')
@@ -179,6 +200,11 @@ try:
 	else:
 		output = sys.stdout
 
+	cfg = configparser.RawConfigParser()
+	cfg.read(args.config);
+	cfg = cfg['output']
+	underchar = cfg['underchar']
+
 	dirsz = []
 
 	for d in dirlist:
@@ -195,23 +221,22 @@ try:
 	dc = len(dirsz)
 	fcount = 0
 	dlist = ','.join(dirlist)
-	print('Top {} Space Hogging directories in {}'.format(dc,dlist), file=output)
 	if output != sys.stdout:
 		d = datetime.datetime.now()
 		d = d.strftime("%H:%M, %d %B, %Y")
-		print("Report run {}".format(d),file=output)
-	print(' ')
-	print('{} Path'.format('Size'.rjust(width)), file=output)
-	print('{} {}'.format(''.rjust(width,'='),''.rjust(dwidth+1,'=')), file=output)
+		print('      {}'.format(parseline(cfg['datetime'],datetime=d)),file=output)
+	header(cfg['title'],output,True,underchar,count=dc,dirlist=dlist) # Top 10 space hogging...
+	header(cfg['header'],output,True,underchar, justify=True,justfields=[0,1], justsize=[width,dwidth])
 	for sz,path,fc in dirsz:
 		fcount = fcount + fc
 		total = total + sz
 		sz = format_bytes(sz)
-		print('{} {}'.format(sz.rjust(width),path), file=output)
+		print('      {} {}'.format(sz.rjust(width),path), file=output)
 
-	print('\n\t{} in {} directories ({} files)\n'.format(format_bytes(total),dc, fcount), file=output)
+	print('      \n\t{}\n'.format(parseline(cfg['footer'],total=total,dircount=dc,filecount=fc)),file=output)
+
 	if(args.showfs):
-		print(header("File System Information"));
+		header(cfg['fsheader'],output,True, underchar)
 		fs = {}
 		for d in dirlist:
 			m = getmount(d)
@@ -234,7 +259,7 @@ try:
 			p = fsi[f]
 			p = find_sdiskpart(f)
 			p = p.device
-			print('\t{}:\t{} bytes total, {} bytes free ({}% free)\n\t\tdir(s): {}'.format(p,tot,free,perc,dirs),file=output)
+			print('      \t{}:\t{} bytes total, {} bytes free ({}% free)\n\t\tdir(s): {}'.format(p,tot,free,perc,dirs),file=output)
 
 except KeyboardInterrupt:
 	print('\n\nInterrupted',file=sys.stderr)
