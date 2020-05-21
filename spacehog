@@ -26,23 +26,11 @@ def parseline(s,**kwargs):
 def header(s, output, underline=False, underchar='=',**kwargs):
 	hl = ''
 	s = parseline(s,**kwargs)
-	if 'justify' in kwargs:
-		justify = kwargs['justify']
-		if 'justfields' in kwargs and 'justwidths' in kwargs:
-			justfields = kwargs['justfields']
-			justwidths = kwargs['justwidths']
-		else:
-			justify = False
-	else:
-		justify = False
 
 	if(underline):
 		for l in s.split(' '):
 			hl = hl + ' '.rjust(len(l)+1,underchar)
 	print('      {}\n      {}\n'.format(s,hl), file=output)
-
-def percentage(part, whole):
-  return 100 * float(part)/float(whole)
 
 def find_sdiskpart(path):
     path = os.path.abspath(path)
@@ -202,7 +190,6 @@ try:
 
 	if not os.path.isabs(args.config):
 		args.config = os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(sys.argv[0]))),args.config)
-	#print("Using config {}".format(args.config),file=sys.stderr)
 	if not os.path.exists(args.config):
 		print('Cannot find config file, {}'.format(args.config), file=sys.stderr)
 		sys.exit(1)
@@ -217,7 +204,7 @@ try:
 		dirsz = dirsz + scanner(d,quiet,ignore, mounted)
 
 	if len(dirsz) < 1:
-		print('No directories found in {}'.format(basedir), file=sys.stdout)
+		print('No directories found in {}'.format(basedir), file=sys.stderr)
 		sys.exit(1)
 
 	dirsz = sorted(dirsz,key=lambda item: item[0],reverse=True)[:count]
@@ -229,10 +216,12 @@ try:
 	dlist = ','.join(dirlist)
 	if output != sys.stdout:
 		d = datetime.datetime.now()
-		d = d.strftime("%H:%M, %d %B, %Y")
+		d = d.strftime(cfg['dateformat'])
 		print('      {}'.format(parseline(cfg['datetime'],datetime=d)),file=output)
 	header(cfg['title'],output,True,underchar,count=dc,dirlist=dlist) # Top 10 space hogging...
-	header(cfg['header'],output,True,underchar, justify=True,justfields=[0,1], justsize=[width,dwidth])
+	pheader = cfg['header'].split(' ')
+	print('      {} {}'.format(pheader[0].rjust(width), pheader[1]),file=output)
+	print('      {} {}'.format(underchar.rjust(width,underchar), underchar.ljust(dwidth,underchar)),file=output)
 	for sz,path,fc in dirsz:
 		fcount = fcount + fc
 		total = total + sz
@@ -259,7 +248,7 @@ try:
 			fsi[f] = [size,free]
 		for f in fs:
 			tot,free = fsi[f]
-			perc = int(percentage(free,tot))
+			perc = int(100 * float(free)/float(tot))
 			tot = format_bytes(tot)
 			free = format_bytes(free)
 			dirs = '\n\t\t\t'.join(fs[f])

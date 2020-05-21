@@ -68,35 +68,32 @@ The file, default.ini, contains message texts and tokens to be replaced at runti
 
 `spacehog --ignore /home/nicci/ignorethese.txt /usr` Counts the top 10 disk consumers in /usr, ignoring paths in */home/nicci/ignorethese.txt*
 
-
-
 ### Sample Output
 
-      Report Run: 13:14, 20 May, 2020
-      Top 10 Space Hogging directories in /
-      --- -- ----- ------- ----------- -- -
+      Report Run: 06:43, 21 May, 2020
+      Top 10 Directories in /Volumes/Extra/Users/nicci
+      --- -- ----------- -- --------------------------
 
-      Size Path
-      ---- ----
+         Size Path
+      ------- --------------
+      325.3Gb Pictures
+       36.4Gb VirtualBox VMs
+       19.5Gb Library
+       12.9Gb Downloads
+       10.2Gb pdbak
+        1.4Gb Dropbox
+        1.2Gb Music
+        1.2Gb Tools
+      489.7Mb DAW
+      449.1Mb Documents
 
-      118.6Gb Users
-       15.5Gb Applications
-       10.1Gb System
-        9.1Gb private
-        9.0Gb var
-        4.9Gb Library
-        2.1Gb usr
-       18.5Mb tmp
-        6.1Mb sbin
-        5.2Mb .DocumentRevisions-V100
-
-	169.3Gb bytes in 10 directories (16 files)
+	409.1Gb bytes in 10 directories (3855 files)
 
       File System Information
       ---- ------ -----------
 
-      	/dev/disk0s2:	465.0Gb bytes total, 310.9Gb bytes free (66% free)
-		dir(s): /
+      	/dev/disk1s4:	156.3Gb bytes total, 45.2Gb bytes free (28% free)
+		dir(s): /Volumes/Extra/Users/nicci
 
 Copyright &copy; 2020 Nicole Stevens. Code may be freely used. Please keep my copyright intact. 
 
