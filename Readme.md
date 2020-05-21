@@ -58,7 +58,7 @@ By default, *spacehog* will not traverse mounted filesystems. This is done using
 By default, *spacehog* displays it's progress/status when scanning directories. To prevent this, use gthe --quiet option. This is useful if you want a report generrated. 
 
 ## Customizing
-The file, default.ini, contains message texts and tokens to be replaced at runtime. These texts can be changed to customize the texts or even change to another language.
+The file, spacehog.ini, contains message texts and tokens to be replaced at runtime. These texts can be changed to customize the texts or even change to another language.
 
 
 ## Examples
