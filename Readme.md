@@ -14,7 +14,7 @@ To install follow these steps:
       git clone https://github.com/nicciniamh/spacehog.git
       cp spacehog/spacehog ~/bin # or other directory on PATH
       chmod 755 ~bin/spacehog
-      cp default.ini ~/bin # This file must be present.
+      cp spacehog.ini ~/bin # This file must be present.
       pip3 install psutils
 
 ## Usage

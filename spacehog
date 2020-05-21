@@ -135,7 +135,7 @@ def scanner(sdir,quiet,ignore, mounted):
 try:
 	parser = argparse.ArgumentParser();
 	parser.description = "Spacehog - show top disk space hogs"
-	parser.add_argument('--config',type=str,help="Conmfiguation file. Default is default.ini in cwd", metavar='filename',default='default.ini')
+	parser.add_argument('--config',type=str,help="Conmfiguation file. Default is spacehog.ini in cwd", metavar='filename',default='spacehog.ini')
 	parser.add_argument('--count',type=int,help="Show top n directories, default is 10", metavar='number')
 	parser.add_argument('--ignore',type=str,help='file name containing list of directories to ignore. Default is .spacehog.ignore if it exists',metavar='filename')
 	parser.add_argument('--mounted',help='Traverse mounted filesystems',action='store_true')
