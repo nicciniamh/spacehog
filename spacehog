@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import argparse, re, os, sys, datetime, psutil, textwrap, configparser
+import argparse, re, os, sys, datetime, psutil, configparser, filelist
+
 """
 Program to find the top disk hogs in a directory tree. 
 Usage: prog args [path]
@@ -14,6 +15,23 @@ Copyright (C) 2020 Nicole Stevens. Code may be freely used. Please keep my copyr
 For license see LICENSE. 
 
 """
+
+def wrap_path(path, width=70):
+	cur = ''
+	pathlist = []
+	for l in path.split(os.path.sep):
+		t = os.path.join(cur,l)
+		if len(t) > width:
+			if len(l) >= width:
+				l = l[:width-3]+'...'
+			pathlist.append(cur+os.path.sep)
+			cur = l
+		else:
+			cur = t
+	if cur:
+		pathlist.append(cur)
+	return pathlist
+
 
 def parseline(s,**kwargs):
 	l = ''
@@ -92,8 +110,7 @@ def scanner(sdir,quiet,ignore, mounted):
 			ignorefile = ignore
 		try:
 			if os.path.exists(ignorefile):
-				with open(ignorefile) as f:
-					ignorelist = f.readlines()
+				ignorelist = filelist.list(ignorefile)
 				ignorelist = [x.strip() for x in ignorelist]
 				ignorelist = '(?:% s)' % '|'.join(ignorelist)
 			else:
@@ -119,7 +136,7 @@ def scanner(sdir,quiet,ignore, mounted):
 				if not quiet:
 					sys.stdout.write("\rScanning {}\033[K\r".format(d))
 				sz, fc = getdirsz(d)
-				dirsz.append((sz, f, fc))
+				dirsz.append((sz, f, fc, sdir))
 				fcount = fcount + fc
 	except Exception as e:
 		if hasattr(e, 'message'):
@@ -204,7 +221,7 @@ try:
 		dirsz = dirsz + scanner(d,quiet,ignore, mounted)
 
 	if len(dirsz) < 1:
-		print('No directories found in {}'.format(basedir), file=sys.stderr)
+		print('No directories found in {}'.format(', '.join(dirlist)), file=sys.stderr)
 		sys.exit(1)
 
 	dirsz = sorted(dirsz,key=lambda item: item[0],reverse=True)[:count]
@@ -219,17 +236,30 @@ try:
 		d = d.strftime(cfg['dateformat'])
 		print('      {}'.format(parseline(cfg['datetime'],datetime=d)),file=output)
 	header(cfg['title'],output,True,underchar,count=dc,dirlist=dlist) # Top 10 space hogging...
+	print('     Scanned ',file=output)
+	for d in dirlist:
+		print('        {}'.format(d),file=output)
+	print('',file=output)
 	pheader = cfg['header'].split(' ')
 	print('      {} {}'.format(pheader[0].rjust(width), pheader[1]),file=output)
 	print('      {} {}'.format(underchar.rjust(width,underchar), underchar.ljust(dwidth,underchar)),file=output)
-	for sz,path,fc in dirsz:
+	fcount = 0
+	for sz,path,fc,sd in dirsz:
 		fcount = fcount + fc
 		total = total + sz
-		sz = format_bytes(sz)
-		print('      {} {}'.format(sz.rjust(width),path), file=output)
+		dc = dc + 1
+		sz = format_bytes(sz).rjust(width)
+		p = os.path.join(sd,path)
+		p = wrap_path(p,40)
+		pad = ''.ljust(10,' ')
+		op = '{}{} {}'.format(pad,sz,p[0])
+		pad = ''.ljust(12+width,' ')
+		for l in p[1:]:
+			op += '\n{}{}'.format(pad,l)
+		print(op,file=output)
 
 	total = format_bytes(total)
-	print('      \n\t{}\n'.format(parseline(cfg['footer'],total=total,dircount=dc,filecount=fc)),file=output)
+	print('      \n\t{}\n'.format(parseline(cfg['footer'],total=total,dircount=dc,filecount=fcount)),file=output)
 
 	if(args.showfs):
 		header(cfg['fsheader'],output,True, underchar)
