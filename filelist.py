@@ -8,7 +8,8 @@ class list(list):
 
 	def initialize(self,arg=False):
 		if not arg:
-			filename = '/dev/null'
+			self.clear()
+			return
 		else:
 			filename = arg
 
